@@ -18,8 +18,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-from .common import CLIENT_ID, TENANT_ID, TIMEOUT, EMAIL, PASSWORD, WEBDRIVER_OPTIONS, Logger
-from .common import get_access_token, get_device_code, interact_with_ui, wait, wait_loading
+from src.common import CLIENT_ID, TENANT_ID, TIMEOUT, EMAIL, PASSWORD, WEBDRIVER_OPTIONS, Logger
+from src.common import get_access_token, get_device_code, interact_with_ui, wait, wait_loading
 
 BASE_URL = "https://app.powerbi.com/groups/"
 LOGIN_WORDS = ("singleSignOn", "signin", "login")
@@ -155,10 +155,10 @@ class WebExtractor:
                     update_check = row.find(
                         "i",
                         {"class": ["warning", "glyphicon", "pbi-glyph-warning", "glyph-small"]}
-                    ) or row.find("span", {"class": "dataflow-refresh-icons"}).find(
+                    ) or (row.find("span", {"class": "dataflow-refresh-icons"}).find(
                         "button",
                         {"class": ["glyphicon", "pbi-glyph-warning", "ng-star-inserted"]}
-                    )
+                    ) if row.find("span", {"class": "dataflow-refresh-icons"}) else None)
 
                     # implementar lógica de atualizar automaticamente no futuro
 

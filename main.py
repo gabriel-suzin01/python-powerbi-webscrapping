@@ -1,7 +1,7 @@
 """Módulo principal. Ele que é o responsável pela execução do programa."""
 
-from .src.info import WebExtractor
-from .src.sharepoint import UpdateSharepointFile
+from src.info import WebExtractor
+from src.sharepoint import UpdateSharepointFile
 
 def main() -> None:
     """Função principal."""

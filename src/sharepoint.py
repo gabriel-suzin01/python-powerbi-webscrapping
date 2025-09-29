@@ -14,8 +14,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from .common import CLIENT_ID, TENANT_ID, TIMEOUT, WEBDRIVER_OPTIONS, Logger
-from .common import get_access_token, get_device_code
+from src.common import CLIENT_ID, TENANT_ID, TIMEOUT, WEBDRIVER_OPTIONS, Logger
+from src.common import get_access_token, get_device_code
 
 FILE_PATH = (
     "/sites/#/Shared Documents/"
