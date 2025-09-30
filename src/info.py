@@ -152,13 +152,18 @@ class WebExtractor:
                         row.find("span", {"data-testid": "fluentListCell.lastRefresh"}) or {}
                     ).get("title", "Desconhecida.")
 
-                    update_check = row.find(
-                        "i",
-                        {"class": ["warning", "glyphicon", "pbi-glyph-warning", "glyph-small"]}
-                    ) or (row.find("span", {"class": "dataflow-refresh-icons"}).find(
-                        "button",
-                        {"class": ["glyphicon", "pbi-glyph-warning", "ng-star-inserted"]}
-                    ) if row.find("span", {"class": "dataflow-refresh-icons"}) else None)
+                    update_check = {
+                        "button": row.find("span", {"class": "dataflow-refresh-icons"}).find(
+                            "button",
+                            {"class": ["glyphicon", "pbi-glyph-warning", "ng-star-inserted"]}
+                        ) if row.find("span", {"class": "dataflow-refresh-icons"}) else None,
+                        "icon": row.find(
+                            "i",
+                            {"class": ["warning", "glyphicon", "pbi-glyph-warning", "glyph-small"]}
+                        )
+                    }
+
+                    update_check = bool(update_check["icon"] or update_check["button"])
 
                     # implementar lógica de atualizar automaticamente no futuro
 
