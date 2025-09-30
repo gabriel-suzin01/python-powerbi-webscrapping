@@ -150,7 +150,7 @@ class WebExtractor:
 
                     last_refresh = (
                         row.find("span", {"data-testid": "fluentListCell.lastRefresh"}) or {}
-                    ).get("title", "Data de última atualização desconhecida.")
+                    ).get("title", "Desconhecida.")
 
                     update_check = row.find(
                         "i",
@@ -164,7 +164,7 @@ class WebExtractor:
 
                     next_upt = (
                         row.find("span", {"data-testid": "fluentListCell.nextRefresh"}) or {}
-                    ).get("title", "Data da próxima atualização desconhecida.")
+                    ).get("title", "Desconhecida.")
 
                     if workspace_name not in execution_data:
                         execution_data[workspace_name] = {}
@@ -176,7 +176,7 @@ class WebExtractor:
                         "tipo": file_type,
                         "last_update": last_refresh,
                         "atualizado_hoje": last_refresh[0:9] == self.__current_date[0:9],
-                        "update_success": update_check,
+                        "update_success": not update_check, # inverte: se tiver valor, deu erro
                         "next_update": next_upt,
                         "agendamento_cancelado": next_upt == "N/D"
                     }
