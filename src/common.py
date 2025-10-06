@@ -7,9 +7,13 @@
     - Configuração de logging para monitoramento e depuração.
 """
 
+import configparser
+import os
 import sys
 import time
 import logging
+from pathlib import Path
+from dotenv import load_dotenv
 import requests
 from requests.exceptions import RequestException
 
@@ -29,25 +33,37 @@ logging.basicConfig(
     filemode="w"
 )
 
+# Configurando arquivo .ini
+
+Config = configparser.ConfigParser()
+
+if getattr(sys, 'frozen', False): # atributo criado pelo pyinstaller
+    Config.read(Path(sys.executable).parent / "settings.ini")
+else:
+    Config.read(Path(__file__).parent / "settings.ini")
+
 # Variáveis globais
 
 Logger = logging.getLogger()
 
-# passar valores para uma venv
+load_dotenv()
 
-TENANT_ID = "#"
-EMBEDDED_CLIENT_ID = "#"
-CLIENT_ID = "#"
+TENANT_ID = os.getenv("TENANT_ID")
+CLIENT_ID = os.getenv("CLIENT_ID")
+EMAIL = os.getenv("EMAIL")
+PASSWORD = os.getenv("PASSWORD")
 
 WEBDRIVER_OPTIONS = webdriver.ChromeOptions()
-WEBDRIVER_OPTIONS.add_argument("--headless=new") # --headless=new / --start-maximized
+
+if Config.get("INIT", "SHOW_SCREEN").lower() == "false":
+    WEBDRIVER_OPTIONS.add_argument("--headless=new")
+else:
+    WEBDRIVER_OPTIONS.add_argument("--start-maximized")
+
 WEBDRIVER_OPTIONS.add_argument("--disable-notifications")
 WEBDRIVER_OPTIONS.add_argument("--disable-extensions")
 WEBDRIVER_OPTIONS.add_argument("--disable-background-networking")
 WEBDRIVER_OPTIONS.add_argument("--disable-gpu")
-
-EMAIL = "#"
-PASSWORD = "#"
 
 LOAD_TIME = 10
 WORKSPACE_REQUEST_INTERVAL = 3

@@ -211,7 +211,8 @@ class WebExtractor:
         tag = parent.find(*selector) if parent else None
         return tag.get_text(strip=True) if tag else "Desconhecido (a)"
 
-    def get_workspaces(self) -> list:
+    @property
+    def workspaces(self) -> list:
         """
             Função responsável por pegar os workspaces do diretório.
             Retorna os workspaces no formato de lista.
@@ -238,6 +239,10 @@ class WebExtractor:
                 response = response.json()
 
                 workspaces = set()
+                for workspace in response.get("value", []):
+                    workspace_id = workspace.get("id")
+                    if workspace_id:
+                        workspaces.add(BASE_URL + workspace_id)
             except WebDriverException as error:
                 Logger.error("[Selenium] Tentativa %s. Erro: %s", attempt, error)
                 if attempt < MAX_RETRIES:
@@ -255,9 +260,7 @@ class WebExtractor:
             Faz login quando necessário, pega as workspaces e coleta dos dados.
         """
 
-        urls = self.get_workspaces()
-
-        for url in urls:
+        for url in self.workspaces:
             self.__read_info(url)
 
         self.__driver.quit()
