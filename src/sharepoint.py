@@ -11,21 +11,32 @@ import requests
 from requests.exceptions import RequestException
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
-from src.common import CLIENT_ID, TENANT_ID, TIMEOUT, WEBDRIVER_OPTIONS, Logger
+from src.common import CHROME_SERVICE, WEBDRIVER_OPTIONS, TIMEOUT
 from src.common import get_access_token, get_device_code
+from src.setup import Config, Logger, get_env_values
 
+nome_site = Config.get("INIT", "SITE_NAME")
+nome_dominio = Config.get("INIT", "DOMAIN_NAME")
+
+if nome_site == "none":
+    Logger.critical("Nome de site não existe!")
+    raise ValueError("Nome do site não existe! (none)")
+if nome_dominio == "none":
+    Logger.critical("Nome do domínio não existe!")
+    raise ValueError("Nome do domínio não existe! (none)")
+
+# criar pasta e arquivo no sharepoint
+# caso modificar o caminho, mudar as variáveis abaixo
 FILE_PATH = (
-    "/sites/#/Shared Documents/"
+    f"/sites/{nome_site}/Shared Documents/"
     "Configurações - Monitoramento BIs/update-pbis-log.xlsx"
 )
 FILE_URL = (
-    "https://#.sharepoint.com/sites/#"
+    f"https://{nome_dominio}.sharepoint.com/sites/{nome_site}/_api/web/"
     f"GetFileByServerRelativeUrl('{quote((FILE_PATH), safe='/')}')/$value"
 )
-SCOPE = "https://#.sharepoint.com/.default"
+SCOPE = f"https://{nome_dominio}.sharepoint.com/.default" # escopo de permissividade
 
 class UpdateSharepointFile:
     """
@@ -63,10 +74,15 @@ class UpdateSharepointFile:
 
         rows = []
 
-        service = Service(ChromeDriverManager().install())
-        self.__driver = webdriver.Chrome(service=service, options=self.__options)
+        response = get_device_code(
+            get_env_values().get('TENANT_ID'),
+            get_env_values().get('CLIENT_ID'),
+            SCOPE
+        )
+        print(response)
 
-        response = get_device_code(TENANT_ID, CLIENT_ID, SCOPE)
+        self.__driver = webdriver.Chrome(service=CHROME_SERVICE, options=self.__options)
+
         access_token = get_access_token(driver=self.__driver, device_code_json=response)
 
         for timestamp, workspaces in json.items():
