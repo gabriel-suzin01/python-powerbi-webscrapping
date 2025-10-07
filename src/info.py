@@ -18,14 +18,17 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-from src.common import CLIENT_ID, TENANT_ID, TIMEOUT, EMAIL, PASSWORD, WEBDRIVER_OPTIONS, Logger
+from src.common import CHROME_SERVICE, WEBDRIVER_OPTIONS, TIMEOUT
 from src.common import get_access_token, get_device_code, interact_with_ui, wait, wait_loading
+from src.setup import Logger, get_env_values
 
 BASE_URL = "https://app.powerbi.com/groups/"
 LOGIN_WORDS = ("singleSignOn", "signin", "login")
 
 MAX_RETRIES = 3
 RETRY_DELAY = 5
+
+SCOPE = "https://analysis.windows.net/powerbi/api/.default" # escopo de permissividade
 
 class WebExtractor:
     """
@@ -66,8 +69,16 @@ class WebExtractor:
                     return
                 self.__driver.get(url)
 
-                interact_with_ui(driver=self.__driver, css="[id='email']", value=EMAIL)
-                interact_with_ui(driver=self.__driver, css="[id='i0118']", value=PASSWORD)
+                interact_with_ui(
+                    driver=self.__driver,
+                    css="[id='email']",
+                    value=get_env_values().get('EMAIL')
+                )
+                interact_with_ui(
+                    driver=self.__driver,
+                    css="[id='i0118']",
+                    value=get_env_values().get('PASSWORD')
+                )
 
                 try:
                     interact_with_ui(driver=self.__driver, css="[id='idSIButton9']")
@@ -222,11 +233,13 @@ class WebExtractor:
             try:
                 workspaces_url = "https://api.powerbi.com/v1.0/myorg/groups"
 
-                scope = "https://analysis.windows.net/powerbi/api/.default"
-                code = get_device_code(TENANT_ID, CLIENT_ID, scope)
+                code = get_device_code(
+                    get_env_values().get('TENANT_ID'),
+                    get_env_values().get('CLIENT_ID'),
+                    SCOPE
+                )
 
-                service = Service(ChromeDriverManager().install())
-                self.__driver = webdriver.Chrome(service=service, options=self.__options)
+                self.__driver = webdriver.Chrome(service=CHROME_SERVICE, options=self.__options)
 
                 self.__access_token = get_access_token(driver=self.__driver, device_code_json=code)
 
@@ -238,11 +251,12 @@ class WebExtractor:
                 response.raise_for_status()
                 response = response.json()
 
-                workspaces = set()
+                all_workspaces = set()
                 for workspace in response.get("value", []):
                     workspace_id = workspace.get("id")
                     if workspace_id:
-                        workspaces.add(BASE_URL + workspace_id)
+                        all_workspaces.add(BASE_URL + workspace_id)
+                return list(all_workspaces)
             except WebDriverException as error:
                 Logger.error("[Selenium] Tentativa %s. Erro: %s", attempt, error)
                 if attempt < MAX_RETRIES:
@@ -251,8 +265,7 @@ class WebExtractor:
                 else:
                     Logger.critical("[Selenium] Não foi possível pegar as workspaces!")
                     sys.exit()
-
-            return list(workspaces)
+        return []
 
     def get_info(self) -> dict:
         """

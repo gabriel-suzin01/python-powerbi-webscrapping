@@ -7,13 +7,8 @@
     - Configuração de logging para monitoramento e depuração.
 """
 
-import configparser
-import os
 import sys
 import time
-import logging
-from pathlib import Path
-from dotenv import load_dotenv
 import requests
 from requests.exceptions import RequestException
 
@@ -23,35 +18,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
-# Configurando logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    filename="logger.log",
-    filemode="w"
-)
-
-# Configurando arquivo .ini
-
-Config = configparser.ConfigParser()
-
-if getattr(sys, 'frozen', False): # atributo criado pelo pyinstaller
-    Config.read(Path(sys.executable).parent / "settings.ini")
-else:
-    Config.read(Path(__file__).parent / "settings.ini")
+from src.setup import Config, Logger, get_env_values
 
 # Variáveis globais
 
-Logger = logging.getLogger()
-
-load_dotenv()
-
-TENANT_ID = os.getenv("TENANT_ID")
-CLIENT_ID = os.getenv("CLIENT_ID")
-EMAIL = os.getenv("EMAIL")
-PASSWORD = os.getenv("PASSWORD")
+CHROME_SERVICE = Service(ChromeDriverManager().install())
 
 WEBDRIVER_OPTIONS = webdriver.ChromeOptions()
 
@@ -96,10 +70,18 @@ def get_access_token(driver: webdriver, device_code_json: str) -> str:
     except WebDriverException:
         try:
             Logger.info("[Selenium] Inserindo e-mail...")
-            interact_with_ui(driver=driver, css="[type='email'][id='i0116']", value=EMAIL)
+            interact_with_ui(
+                driver=driver,
+                css="[type='email'][id='i0116']",
+                value=get_env_values().get('EMAIL')
+            )
 
             Logger.info("[Selenium] Inserindo senha...")
-            interact_with_ui(driver=driver, css="[type='password'][id='i0118']", value=PASSWORD)
+            interact_with_ui(
+                driver=driver,
+                css="[type='password'][id='i0118']",
+                value=get_env_values().get('PASSWORD')
+            )
 
             Logger.info("[Selenium] Clicando para continuar...")
             interact_with_ui(driver=driver, css="[id='idSIButton9']")
@@ -115,10 +97,13 @@ def get_access_token(driver: webdriver, device_code_json: str) -> str:
     wait_loading(driver)
     time.sleep(WORKSPACE_REQUEST_INTERVAL)
 
-    token_url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
+    token_url = (
+        f"https://login.microsoftonline.com/{get_env_values().get('TENANT_ID')}"
+        "/oauth2/v2.0/token"
+    )
     token_data = {
         "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-        "client_id": CLIENT_ID,
+        "client_id": get_env_values().get('CLIENT_ID'),
         "device_code": device_code_json["device_code"]
     }
 
@@ -225,4 +210,3 @@ def wait_loading(driver: webdriver) -> None:
 
         if state == "complete":
             break
-    
