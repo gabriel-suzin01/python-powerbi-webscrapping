@@ -1,21 +1,30 @@
-# 🔭 Monitoramento Power BI
+# 🔭 Power BI Monitoring
 
-Este projeto automatiza o monitoramento dos horários de atualização dos fluxos / modelos semânticos do Power BI Online.
-Os dados são coletados e repassados para um arquivo .xlsx, que é então publicado no Sharepoint e utilizado em um relatório Power BI!
+This project automates the monitoring of refresh schedules for Power BI Online **dataflows** and **semantic models**.  
+The data is collected and transferred to an `.xlsx` file, which is then published to **SharePoint** and used in a **Power BI report**!
 
-### 👣 Instalação e execução
+### 👣 Installation & Execution
 
-- **O arquivo executável já está na pasta `files`, basta baixar!**
-- Caso quiser alterar alguma configuração de execução, basta alterar os valores das variáveis dentro do arquivo `settings.ini`.
+- **The executable file is already available in the** `files` **folder — just download it!**
+- If you wish to adjust any execution settings, simply modify the values inside the `settings.ini` file.
 
-### 🛠️ Conversão .py --> .exe
+### 🛠️ .py --> .exe Conversion
 
-- A criação de uma `venv` é fundamental! Para criar uma `venv`:
-    1. `python -m venv nome_venv`
-    2. `venv\Scripts\activate` | windows OU `source venv/bin/activate` | linux
-    3. `pip install -r requirements.txt`
-- Caso queira converter manualmente o `main.py` em arquivo .exe, é possível fazer isso com a biblioteca `pyinstaller`. O código é o seguinte: `pyinstaller --onefile --noconsole --paths=./nome_da_pasta --hidden-import=setup --hidden-import=common --hidden-import=info --hidden-import=sharepoint --hidden-import=__init__ main.py`, para adicionar todas as importações e dependências corretamente.
+- Creating a `venv` is essential! To create a virtual environment:
+```bash
+    python -m venv venv_name
 
-### 📝 Qualidade de código
+    venv\Scripts\activate # Windows
+    # OR
+    source venv/bin/activate # Linux
 
-###### _Todos os scripts foram verificados com a biblioteca `pylint`, versão 3.3.8 e receberam classificação máxima (10/10)!_ ✅
+    pip install -r requirements.txt
+```
+- If you want to manually convert `main.py` to an executable, you can do so using the `pyinstaller` library. Use the following command to include all imports and dependencies correctly:  
+```bash
+pyinstaller --onefile --noconsole --paths=./folder_name --hidden-import=setup --hidden-import=common --hidden-import=info --hidden-import=sharepoint --hidden-import=__init__ main.py
+```
+
+### 📝 Code Quality
+
+###### _All scripts were checked using the `pylint` library (version 3.3.8) and received the maximum score (10/10)!_ ✅
