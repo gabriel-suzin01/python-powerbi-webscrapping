@@ -5,7 +5,7 @@ The data is collected and transferred to an `.xlsx` file, which is then publishe
 
 ### 👣 Installation & Execution
 
-- **The executable file is already available in the** `files` **folder — just download it!**
+- **Just access the `releases` tab!**
 - If you wish to adjust any execution settings, simply modify the values inside the `settings.ini` file.
 
 ### 🛠️ .py --> .exe Conversion
